@@ -1,9 +1,13 @@
 // navigation/RootNavigator.tsx
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import {
+  createDrawerNavigator,
+  DrawerToggleButton,
+} from '@react-navigation/drawer';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen.tsx';
 import QuizScreen from '../screens/QuizScreen.tsx';
 import ResultsScreen from '../screens/ResultsScreen.tsx';
+import DrawerContent from './DrawerContent.tsx';
 import type { HomeStackParamList, RootDrawerParamList } from './types.ts';
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
@@ -15,7 +19,10 @@ function HomeStack() {
       <Stack.Screen
         name="Home"
         component={HomeScreen}
-        options={{ title: 'Quiz' }}
+        options={{
+          title: 'Quiz',
+          headerLeft: () => <DrawerToggleButton />,
+        }}
       />
       <Stack.Screen
         name="Quiz"
@@ -28,11 +35,16 @@ function HomeStack() {
 
 export default function RootNavigator() {
   return (
-    <Drawer.Navigator>
+    <Drawer.Navigator
+      drawerContent={(props) => <DrawerContent {...props} />}
+    >
       <Drawer.Screen
         name="Main"
         component={HomeStack}
-        options={{ title: 'Ekran główny' }}
+        options={{
+          title: 'Ekran główny',
+          headerShown: false,
+        }}
       />
       <Drawer.Screen
         name="Results"

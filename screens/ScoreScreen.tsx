@@ -1,16 +1,46 @@
 // screens/ScoreScreen.tsx
+import { useNavigation } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import type { Result } from '../data/results.ts';
 import { findTest } from '../data/tests.ts';
-import type { HomeStackParamList } from '../navigation/types.ts';
+import type { HomeStackParamList, ScoreNavigation } from '../navigation/types.ts';
+import { saveResult } from '../storage/storage.ts';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'Score'>;
 
-export default function ScoreScreen({ route, navigation }: Props) {
+function formatToday(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+export default function ScoreScreen({ route }: Props) {
+  const navigation = useNavigation<ScoreNavigation>();
   const { testId, score, total } = route.params;
   const test = findTest(testId);
+
   const [nick, setNick] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  async function handleSave(): Promise<void> {
+    if (saving) return;
+    setSaving(true);
+    try {
+      const newResult: Result = {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        nick: nick.trim() || 'Anonim',
+        score,
+        total,
+        type: test ? test.name : testId,
+        date: formatToday(),
+      };
+      await saveResult(newResult);
+      navigation.popTo('Home');
+      navigation.navigate('Results');
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -28,10 +58,16 @@ export default function ScoreScreen({ route, navigation }: Props) {
       />
 
       <Pressable
-        style={({ pressed }) => [styles.saveButton, pressed && styles.buttonPressed]}
-        onPress={() => {}}
+        style={({ pressed }) => [
+          styles.saveButton,
+          (pressed || saving) && styles.buttonPressed,
+        ]}
+        disabled={saving}
+        onPress={handleSave}
       >
-        <Text style={styles.saveButtonText}>Zapisz wynik</Text>
+        <Text style={styles.saveButtonText}>
+          {saving ? 'Zapisywanie...' : 'Zapisz wynik'}
+        </Text>
       </Pressable>
 
       <Pressable

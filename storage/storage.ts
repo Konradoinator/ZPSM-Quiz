@@ -1,7 +1,9 @@
 // storage/storage.ts
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { Result } from '../data/results.ts';
 
 const TERMS_ACCEPTED_KEY = 'quiz.termsAccepted';
+const RESULTS_KEY = 'quiz.results';
 
 export async function getJSON<T>(key: string): Promise<T | null> {
   const raw = await AsyncStorage.getItem(key);
@@ -9,7 +11,6 @@ export async function getJSON<T>(key: string): Promise<T | null> {
   try {
     return JSON.parse(raw) as T;
   } catch {
-    // Uszkodzony lub nieaktualny wpis usuwamy i traktujemy jako brak danych.
     await AsyncStorage.removeItem(key);
     return null;
   }
@@ -26,4 +27,14 @@ export async function hasAcceptedTerms(): Promise<boolean> {
 
 export async function acceptTerms(): Promise<void> {
   await setJSON(TERMS_ACCEPTED_KEY, true);
+}
+
+export async function getResults(): Promise<Result[]> {
+  const stored = await getJSON<Result[]>(RESULTS_KEY);
+  return Array.isArray(stored) ? stored : [];
+}
+
+export async function saveResult(result: Result): Promise<void> {
+  const existing = await getResults();
+  await setJSON(RESULTS_KEY, [result, ...existing]);
 }

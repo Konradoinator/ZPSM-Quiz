@@ -9,6 +9,7 @@ import QuizScreen from '../screens/QuizScreen.tsx';
 import ResultsScreen from '../screens/ResultsScreen.tsx';
 import DrawerContent from './DrawerContent.tsx';
 import type { HomeStackParamList, RootDrawerParamList } from './types.ts';
+import ScoreScreen from '../screens/ScoreScreen.tsx';
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
 const Drawer = createDrawerNavigator<RootDrawerParamList>();
@@ -28,6 +29,11 @@ function HomeStack() {
         name="Quiz"
         component={QuizScreen}
         options={{ title: 'Test' }}
+      />
+      <Stack.Screen
+  	name="Score"
+  	component={ScoreScreen}
+ 	options={{ title: 'Wynik' }}
       />
     </Stack.Navigator>
   );

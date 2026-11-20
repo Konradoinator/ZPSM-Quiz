@@ -1,5 +1,6 @@
 // App.tsx
 import 'react-native-gesture-handler';
+import * as SplashScreen from 'expo-splash-screen';
 import { NavigationContainer } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
@@ -8,15 +9,22 @@ import RootNavigator from './navigation/RootNavigator.tsx';
 import WelcomeScreen from './screens/WelcomeScreen.tsx';
 import { acceptTerms, hasAcceptedTerms } from './storage/storage.ts';
 
+
+SplashScreen.preventAutoHideAsync();
+SplashScreen.setOptions({ duration: 400, fade: true });
+
 export default function App() {
   // Trzy stany: null (wczytywanie), false (nie zaakceptowano), true (zaakceptowano)
   const [accepted, setAccepted] = useState<boolean | null>(null);
 
   useEffect(() => {
-    hasAcceptedTerms()
-      .then((value) => setAccepted(value === true))
-      .catch(() => setAccepted(false));
-  }, []);
+  hasAcceptedTerms()
+    .then((value) => setAccepted(value === true))
+    .catch(() => setAccepted(false))
+    .finally(() => {
+      SplashScreen.hideAsync();
+    });
+    }, []);
 
   async function handleAccept(): Promise<void> {
     await acceptTerms();
